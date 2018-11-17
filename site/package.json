@@ -1,0 +1,24 @@
+{
+  "name": "meadowlark2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "meadowlark2.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-handlebars": "^3.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/horsepowermini/meadowlark2.git"
+  },
+  "author": "horsepowermini",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/horsepowermini/meadowlark2/issues"
+  },
+  "homepage": "https://github.com/horsepowermini/meadowlark2#readme"
+}

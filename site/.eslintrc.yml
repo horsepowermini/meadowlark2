@@ -1,0 +1,8 @@
+ extends:
+   - 'airbnb-base'
+ env:
+   node: true
+   browser: true
+ rules:
+   semi: 0
+   no-underscore-dangle: 0

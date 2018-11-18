@@ -3,6 +3,10 @@
  env:
    node: true
    browser: true
+ plugins:
+   - eslint-plugin-html
  rules:
    semi: 0
    no-underscore-dangle: 0
+   no-console: 0
+   strict: 0

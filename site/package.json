@@ -4,8 +4,10 @@
   "description": "",
   "main": "meadowlark2.js",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "express": "^4.16.4",
-    "express-handlebars": "^3.0.0"
+    "express-handlebars": "^3.0.0",
+    "formidable": "^1.2.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",

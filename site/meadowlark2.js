@@ -3,6 +3,7 @@
 const express = require('express')
 const path = require('path')
 const handlebars = require('express-handlebars')
+const formidable = require('formidable')
 const communistQuotes = require('./lib/communistQuotes.js')
 
 const app = express()
@@ -61,6 +62,9 @@ app.use((req, res, next) => {
   next()
 })
 
+// Обработка форм
+app.use(require('body-parser').urlencoded({ extended: true }))
+
 // Код для тестирования
 app.use((req, res, next) => {
   res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1'
@@ -116,6 +120,58 @@ app.get('/without_layout', (req, res) => {
 // с использованием другого макета (отличного от указанного по умолчанию)
 app.get('/different_layout', (req, res) => {
   res.render('different_layout', { layout: 'microsite' })
+})
+
+
+// Страница благодарности за подписку
+app.get('/thank-you', (req, res) => {
+  res.render('thank-you')
+})
+
+// маршрут для страницы с формой
+app.get('/newsletter', (req, res) => {
+  res.render('newsletter', { csrf: 'CSRF token goes here' })
+})
+
+// маршрут для обработки данных формы
+app.post('/process', (req, res) => {
+  console.log(`Form (from querystring): ${req.query.form}`)
+  console.log(`CSRF token (from hidden form field): ${req.body._csrf}`)
+  console.log(`Name (from visible form field): ${req.body.name}`)
+  console.log(`Email (from visible form field): ${req.body.email}`)
+  res.redirect(303, '/thank-you')
+})
+
+// маршрут для обработки данных формы полученных с помощью AJAX запроса
+app.post('/process', (req, res) => {
+  if (req.xhr || req.accepts('json.html') === 'json') {
+    // если здесь есть ошибка, то мы должны отправить { error: 'описание ошибки' }
+    res.send({ success: true })
+  } else {
+    // если бы была ошибка, нам нужно было бы перенаправлять на страницу ошибки
+    res.redirect(303, '/thank-you')
+  }
+})
+
+// обработка файлов загружаемых через браузер
+app.get('/contest/vacation-photo', (req, res) => {
+  const now = new Date()
+  res.render('contest/vacation-photo', {
+    year: now.getFullYear(),
+    month: now.getMonth(),
+  })
+})
+
+app.post('/contest/vacation-photo/:year/:month', (req, res) => {
+  const form = new formidable.IncomingForm()
+  form.parse(req, (err, fields, files) => {
+    if (err) return res.redirect(303, '/error')
+    console.log('recieved fields:')
+    console.log(fields)
+    console.log('recieved files:')
+    console.log(files)
+    res.redirect(303, '/thank-you')
+  })
 })
 
 // Обобщенный обработчик 404 (промежуточное ПО)

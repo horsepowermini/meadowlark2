@@ -5,6 +5,7 @@ const path = require('path')
 const handlebars = require('express-handlebars')
 const formidable = require('formidable')
 const communistQuotes = require('./lib/communistQuotes.js')
+const credentials = require('./credentials.js')
 
 const app = express()
 
@@ -25,6 +26,15 @@ app.set('view engine', '.hbs')
 app.set('port', process.env.PORT || 3000)
 
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(require('cookie-parser')(credentials.cookieSecret))
+app.use(require('express-session')({
+  resave: false,
+  saveUninitialised: false,
+  secret: credentials.cookieSecret,
+}))
+
+// Обработка форм
+app.use(require('body-parser').urlencoded({ extended: true }))
 
 // функция для имитации погодного API
 function getWeatherData() {
@@ -62,9 +72,6 @@ app.use((req, res, next) => {
   next()
 })
 
-// Обработка форм
-app.use(require('body-parser').urlencoded({ extended: true }))
-
 // Код для тестирования
 app.use((req, res, next) => {
   res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1'
@@ -73,6 +80,27 @@ app.use((req, res, next) => {
 
 // Определение маршрутов
 app.get('/', (req, res) => {
+  req.session.userName = 'Anonymous'
+  // const colorScheme = req.session.colorScheme || 'dark'
+
+  req.session.userName = null
+  delete req.session.colorScheme
+
+  console.log(req.session.colorScheme)
+
+  const { monster } = req.cookies
+  const signedMonster = req.signedCookies.signed_monster
+
+  console.log(monster, signedMonster)
+
+  const deleteCookies = false
+  if (deleteCookies) {
+    res.clearCookie('monster')
+    res.clearCookie('signed_monster')
+  } else {
+    res.cookie('monster', 'nom nom')
+    res.cookie('signed_monster', 'nom nom', { signed: true })
+  }
   res.render('home')
 })
 

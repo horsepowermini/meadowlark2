@@ -1,2 +1,3 @@
 # игнорировать установленные пакеты
 node_modules
+credentials.js

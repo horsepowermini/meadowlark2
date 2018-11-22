@@ -78,6 +78,13 @@ app.use((req, res, next) => {
   next()
 })
 
+// использование флеш-сообщения
+app.use((req, res, next) => {
+  res.locals.flash = req.session.flash
+  delete req.session.flash
+  next()
+})
+
 // Определение маршрутов
 app.get('/', (req, res) => {
   req.session.userName = 'Anonymous'
@@ -161,6 +168,10 @@ app.get('/newsletter', (req, res) => {
   res.render('newsletter', { csrf: 'CSRF token goes here' })
 })
 
+app.get('/newsletter2', (req, res) => {
+  res.render('newsletter2', { csrf: 'CSRF token goes here' })
+})
+
 // маршрут для обработки данных формы
 app.post('/process', (req, res) => {
   console.log(`Form (from querystring): ${req.query.form}`)
@@ -180,6 +191,50 @@ app.post('/process', (req, res) => {
     res.redirect(303, '/thank-you')
   }
 })
+
+// тестирование флеш-сообщений через форму
+function NewsletterSignup() {
+}
+NewsletterSignup.prototype.save = function (cb) {
+  cb();
+};
+
+const VALID_EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+app.post('/newsletter2', (req, res) => {
+	let name = req.body.name || ''
+  let email = req.body.email || ''
+  // input validation
+  if (!email.match(VALID_EMAIL_REGEX)) {
+    if (req.xhr) {
+      return res.json({ error: 'Invalid name email address.' });
+    }
+    req.session.flash = {
+      type: 'danger',
+      intro: 'Validation error!',
+      message: 'The email address you entered was  not valid.',
+    }
+    return res.redirect(303, '/newsletter/archive');
+  }
+  new NewsletterSignup({ name: name, email: email }).save((err) => {
+    if (err) {
+      if (req.xhr) return res.json({ error: 'Database error.' });
+      req.session.flash = {
+        type: 'danger',
+        intro: 'Database error!',
+        message: 'There was a database error; please try again later.',
+      };
+      return res.redirect(303, '/newsletter2');
+    }
+    if (req.xhr) return res.json({ success: true });
+    req.session.flash = {
+      type: 'success',
+      intro: 'Thank you!',
+      message: 'You have now been signed up for the newsletter.',
+    };
+    return res.redirect(303, '/newsletter2');
+  });
+});
 
 // обработка файлов загружаемых через браузер
 app.get('/contest/vacation-photo', (req, res) => {
